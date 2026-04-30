@@ -136,6 +136,8 @@ The current internal reference modules are:
 ```txt
 Web Presence + Lead Capture
 Re-zume Local Resume/CV/Application Pipeline
+Media Asset Storage
+Collectors Crypt Design Program Watchlist
 ```
 
 Each module proves reusable platform patterns that can later be adapted across other products or brands.
@@ -202,6 +204,51 @@ Its internal implementation explores reusable platform patterns for:
 
 The public overview does not include private resume seed data, internal job history details, private implementation paths, generated application records, or personal job application workflows.
 
+## Reference Module 3: Media Asset Storage
+
+The third internal reference module is a reusable Media Asset Storage slice.
+
+It proves platform patterns for handling uploaded or externally referenced media in a provider-agnostic way.
+
+This module demonstrates reuse across:
+
+```txt
+provider-neutral media contracts
+→ reusable media ingestion feature
+→ local development storage
+→ adapter-ready provider architecture
+→ private/internal media handling
+→ image source attribution
+→ safe storage path generation
+→ future cloud storage support
+```
+
+The current internal implementation supports local media persistence for development and testing. It is structured so future storage providers can be added through adapter modules without changing product-specific workflows.
+
+The public overview does not include private media files, storage credentials, provider tokens, private asset paths, or imported third-party media.
+
+## Reference Module 4: Collectors Crypt Design Program Watchlist
+
+The fourth internal reference module is a private Collectors Crypt research workflow for tracking public design-program-style submissions, creator names, submission metadata, lore, descriptions, specifications, tags, and referenced images.
+
+It demonstrates how a product-specific feature can consume reusable platform services while keeping proprietary product logic isolated.
+
+This module proves the pattern across:
+
+```
+product-specific domain contracts
+→ product-specific API workflow
+→ reusable RPC media ingestion
+→ local media persistence
+→ React import workflow
+→ React gallery/list workflow
+→ product shell composition
+```
+
+This reference module is intentionally product-specific. Its Collectors Crypt business rules, private scouting workflows, review criteria, and collaboration strategy belong under the product boundary rather than in the reusable platform core.
+
+The public overview does not include private scouting data, downloaded media, private creator notes, internal review records, outreach workflows, or proprietary Collectors Crypt implementation details.
+
 # Core Design Principles
 ## Native capability first
 
@@ -223,9 +270,31 @@ Where practical, generated documents, records, and workflows should support expo
 
 External integrations should be optional adapters, not hard dependencies.
 
+## Adapter isolation
+
+External provider behavior should be isolated behind adapters.
+
+Product code should not call external vendor SDKs directly when a reusable platform contract or feature can provide a cleaner boundary.
+
+For example, media storage can support local development first, then later use a provider adapter without rewriting the product workflow.
+
 ## Product isolation
 
 Each product, brand, or audience-specific platform should remain cleanly separated.
+
+## Product-specific logic stays out of RPC
+
+RPC should contain reusable contracts, features, and adapters.
+
+Product-specific workflows, business rules, review criteria, scouting logic, UI flows, and proprietary behavior should live under the relevant product boundary.
+
+For example:
+
+```txt
+Reusable media ingestion belongs in RPC.
+Collectors Crypt submission review logic belongs in Collectors Crypt.
+Reusable design components belong in RDC.
+```
 
 ## Reusable modules
 
@@ -260,8 +329,66 @@ RuhlinIT Platform Core is intended to support reusable modules across areas such
 - cover letter and application packet workflows
 - job parsing and structured extraction
 - local-first application tracking
+- media asset storage
+- image ingestion and persistence
+- provider-neutral storage contracts
+- local development storage adapters
+- cloud storage adapters
+- private research workflows
+- creator/submission tracking workflows
+- filterable gallery and review interfaces
 
 Not every module exists yet. The platform is being built incrementally, starting with small working slices.
+
+## Internal Project Boundary Pattern
+
+The internal implementation follows clear library boundaries.
+
+Reusable platform logic belongs in RPC:
+
+```txt
+libs/rpc/contracts
+libs/rpc/features
+libs/rpc/adapters
+```
+
+Product-specific logic belongs under the product namespace:
+
+``` txt
+libs/{product-name}/...
+```
+
+Design-system logic belongs in RDC or related design libraries:
+
+``` txt
+libs/platform-core-ui
+libs/platform-core-theme
+```
+
+This helps prevent reusable platform code, product-specific business rules, and design-system concerns from blending together.
+
+## RPC Module Pattern
+
+RPC modules are organized into three main types.
+
+```txt
+contracts
+features
+adapters
+```
+### Contracts
+
+Contracts define provider-neutral TypeScript shapes such as DTOs, request objects, response objects, shared status types, and adapter interfaces.
+
+### Features
+
+Features define reusable platform behavior and orchestration. They may include services, modules, local development implementations, and provider injection points.
+
+### Adapters
+
+Adapters isolate external provider behavior, such as storage providers, CRM tools, cloud services, payment providers, productivity tools, or communication platforms.
+
+This keeps the core platform portable while allowing optional integrations to be added only where useful.
 
 ## Public vs Private Scope
 
@@ -290,6 +417,26 @@ The private repository contains:
 - operational scripts
 - personal seed data
 - private application records
+
+In the “This public repository or README may describe” list, add:
+
+```md
+- public-safe reference module summaries
+- high-level module boundary patterns
+- provider-agnostic architecture concepts
+- local-first MVP validation patterns
+```
+
+In the “The private repository contains” list, add:
+
+```md
+- imported or generated media files
+- provider tokens or credentials
+- product-specific business rules
+- private research and review data
+- private creator or submission notes
+- internal adapter implementation details
+```
 
 ## Why This Exists
 
@@ -334,6 +481,14 @@ Rule-based job parser pattern
 Application tracker pattern
 Document preview and PDF export pattern
 Component test pattern for generated documents
+Provider-neutral media asset contract pattern
+Reusable media ingestion feature pattern
+Local media storage pattern
+Adapter scaffold pattern for external storage providers
+Product-specific Collectors Crypt domain/API feature pattern
+React import panel pattern
+React gallery/list scaffold pattern
+End-to-end local media ingestion smoke test
 ```
 
 Deferred intentionally:
@@ -351,9 +506,33 @@ Public plugin ecosystem
 Hosted multi-user application tracking
 Automated job board submission
 Browser extension workflows
+Production cloud media storage
+Public media republishing workflows
+Creator outreach automation
+Submission scoring automation
+Advanced gallery analytics
+Automated public website scraping
+Hosted multi-user research dashboard
 ```
 
 Those areas may be explored later only after the core platform remains stable, tested, and well documented.
+
+## Recent Internal Progress
+
+Recent internal work has expanded RPC beyond lead capture and document generation into media handling and product-specific research workflows.
+
+New validated patterns include:
+
+```txt
+RPC contract / feature / adapter separation
+local media asset ingestion
+provider-neutral storage contracts
+product-specific API orchestration
+product-specific React feature composition
+runtime smoke testing across API and web apps
+```
+
+This progress reinforces the platform direction: reusable capability is built in RPC, product-specific behavior remains isolated, and external providers are added through optional adapters.
 
 ## Relationship to Future Products
 
@@ -373,6 +552,10 @@ Future product lines may consume platform patterns while keeping their own:
 
 This allows reuse without contamination.
 
+Recent internal reference work also validates that product-specific research workflows can consume reusable platform services without forcing those workflows back into the platform core.
+
+For example, a product can use shared media ingestion while keeping its own domain model, review process, UI, data rules, and collaboration strategy isolated.
+
 ## Example Future Product Areas
 
 RPC may eventually support internal or public-facing systems across areas such as:
@@ -391,6 +574,12 @@ RPC may eventually support internal or public-facing systems across areas such a
 - application tracking
 - training and tutorial generators
 - provider-agnostic integration hubs
+- media repositories
+- digital asset storage
+- creator and submission research workflows
+- private review galleries
+- product scouting tools
+- provider-agnostic file and image workflows
 
 These areas are expected to remain separate products or modules, not one blended application.
 
