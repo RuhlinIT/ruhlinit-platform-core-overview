@@ -21,12 +21,15 @@ RuhlinIT Platform Core is a reusable platform foundation focused on:
 - database and migration standards
 - testing and quality gates
 - documentation standards
+- API documentation standards
 - infrastructure patterns
 - optional integration adapters
 - product and audience isolation
 - local-first MVP development
 - reusable document and export patterns
 - workflow and automation foundations
+- product-specific data-access boundaries
+- health and diagnostics patterns
 
 The goal is to build software once in a clean, reusable way, then adapt it safely across multiple products without copy-pasting fragile one-off code.
 
@@ -49,7 +52,7 @@ The platform is intentionally designed around clean boundaries.
 
 Reusable core capability belongs in the platform.
 
-Product-specific behavior belongs in product adapters.
+Product-specific behavior belongs in product adapters and product-specific modules.
 
 Project-specific implementation belongs in the final app.
 
@@ -90,24 +93,28 @@ CSS Modules where useful
 
 Backend direction:
 
-```
-Java
-Spring Boot
-Gradle
+```txt
+Java / Spring Boot where appropriate
+NestJS / TypeScript where appropriate
 Provider-agnostic service boundaries
+Product-specific API modules
+OpenAPI / Swagger documentation where useful
 ```
 
 Database direction:
 
-```
+```txt
 PostgreSQL
-Flyway migrations
+Prisma ORM where appropriate
+App-level Prisma migrations where appropriate
+Flyway migrations where appropriate
 Native persistence first
+Local-first durable development databases
 ```
 
 Testing direction:
 
-```
+```txt
 Unit tests
 Component tests
 API tests
@@ -118,7 +125,7 @@ Quality gates before module completion
 
 Infrastructure direction:
 
-```
+```txt
 Docker
 Docker Compose
 GitHub
@@ -126,6 +133,8 @@ GitHub Actions planned
 Cloud-provider flexibility
 Terraform where useful
 ```
+
+---
 
 ## Working Reference Modules
 
@@ -142,17 +151,19 @@ Collectors Crypt Design Program Watchlist
 
 Each module proves reusable platform patterns that can later be adapted across other products or brands.
 
+---
+
 ## Reference Module 1: Web Presence + Lead Capture
 
 The first internal reference module is a reusable Web Presence + Lead Capture slice.
 
 It proves the platform pattern across:
 
-```
+```txt
 shared contracts
 → reusable React feature package
 → web app integration
-→ native Spring Boot API
+→ native API
 → PostgreSQL persistence
 → migration-controlled schema
 → automated tests
@@ -204,6 +215,8 @@ Its internal implementation explores reusable platform patterns for:
 
 The public overview does not include private resume seed data, internal job history details, private implementation paths, generated application records, or personal job application workflows.
 
+---
+
 ## Reference Module 3: Media Asset Storage
 
 The third internal reference module is a reusable Media Asset Storage slice.
@@ -227,50 +240,82 @@ The current internal implementation supports local media persistence for develop
 
 The public overview does not include private media files, storage credentials, provider tokens, private asset paths, or imported third-party media.
 
+---
+
 ## Reference Module 4: Collectors Crypt Design Program Watchlist
 
-The fourth internal reference module is a private Collectors Crypt research workflow for tracking public design-program-style submissions, creator names, submission metadata, lore, descriptions, specifications, tags, and referenced images.
+The fourth internal reference module is a private Collectors Crypt research workflow for tracking public design-program-style submissions, creator names, submission metadata, lore, descriptions, specifications, tags, review status, creator/contact workflow state, and referenced images.
 
 It demonstrates how a product-specific feature can consume reusable platform services while keeping proprietary product logic isolated.
 
 This module proves the pattern across:
 
-```
+```txt
 product-specific domain contracts
 → product-specific API workflow
 → reusable RPC media ingestion
 → local media persistence
-→ React import workflow
+→ Prisma-backed PostgreSQL persistence
+→ app-level migration ownership
+→ idempotent import/update behavior
+→ React manual import workflow
 → React gallery/list workflow
+→ review workflow controls
+→ creator/contact workflow controls
 → product shell composition
+→ health diagnostics
+→ Swagger/OpenAPI living documentation
 ```
 
 This reference module is intentionally product-specific. Its Collectors Crypt business rules, private scouting workflows, review criteria, and collaboration strategy belong under the product boundary rather than in the reusable platform core.
 
+Recent internal work on this reference module validates a complete local product loop:
+
+```txt
+manual import form
+→ product-specific API endpoint
+→ reusable media ingestion
+→ local media file persistence
+→ Prisma-backed submission persistence
+→ repeat-safe idempotent imports
+→ review workflow updates
+→ creator/contact workflow updates
+→ gallery refresh and filtering
+→ API restart persistence
+→ health and API documentation endpoints
+```
+
+The workflow supports durable local persistence through PostgreSQL and Prisma, allowing imported submissions, creator records, tags, images, review statuses, and creator contact workflow states to survive API restarts.
+
+The import behavior is designed to be duplicate-safe. Re-importing the same source URL updates the existing submission record instead of creating duplicate gallery entries.
+
 The public overview does not include private scouting data, downloaded media, private creator notes, internal review records, outreach workflows, or proprietary Collectors Crypt implementation details.
 
-# Core Design Principles
-## Native capability first
+---
+
+## Core Design Principles
+
+### Native capability first
 
 Every module should work through the platform’s own native implementation before external integrations are added.
 
-## Provider-agnostic contracts
+### Provider-agnostic contracts
 
 Core contracts should not depend on any one vendor, CRM, cloud provider, payment processor, AI provider, or productivity tool.
 
-## Local-first where practical
+### Local-first where practical
 
 Early MVPs should work locally before requiring hosted infrastructure, paid services, or external integrations.
 
-## Exportable, portable data
+### Exportable, portable data
 
 Where practical, generated documents, records, and workflows should support export, backup, and migration paths.
 
-## Optional adapters
+### Optional adapters
 
 External integrations should be optional adapters, not hard dependencies.
 
-## Adapter isolation
+### Adapter isolation
 
 External provider behavior should be isolated behind adapters.
 
@@ -278,15 +323,15 @@ Product code should not call external vendor SDKs directly when a reusable platf
 
 For example, media storage can support local development first, then later use a provider adapter without rewriting the product workflow.
 
-## Product isolation
+### Product isolation
 
 Each product, brand, or audience-specific platform should remain cleanly separated.
 
-## Product-specific logic stays out of RPC
+### Product-specific logic stays out of RPC
 
 RPC should contain reusable contracts, features, and adapters.
 
-Product-specific workflows, business rules, review criteria, scouting logic, UI flows, and proprietary behavior should live under the relevant product boundary.
+Product-specific workflows, business rules, review criteria, scouting logic, UI flows, persistence rules, API behavior, and proprietary behavior should live under the relevant product boundary.
 
 For example:
 
@@ -296,17 +341,19 @@ Collectors Crypt submission review logic belongs in Collectors Crypt.
 Reusable design components belong in RDC.
 ```
 
-## Reusable modules
+### Reusable modules
 
 Shared capabilities should be packaged, documented, tested, and reused instead of copied between apps.
 
-## Documentation as a first-class asset
+### Documentation as a first-class asset
 
 Each meaningful module should have product notes, technical notes, API contracts, schema guides, rollout guidance, quality checklists, and extraction notes.
 
-## Tests before scale
+### Tests before scale
 
 The platform should not expand faster than its quality gates.
+
+---
 
 ## Example Module Categories
 
@@ -319,7 +366,11 @@ RuhlinIT Platform Core is intended to support reusable modules across areas such
 - media and upload workflows
 - reusable form patterns
 - API contract patterns
+- app-level API documentation
+- Swagger/OpenAPI living documentation
 - database schema patterns
+- Prisma-backed product persistence
+- app-level database migrations
 - integration adapters
 - documentation generators
 - workflow foundations
@@ -337,8 +388,16 @@ RuhlinIT Platform Core is intended to support reusable modules across areas such
 - private research workflows
 - creator/submission tracking workflows
 - filterable gallery and review interfaces
+- idempotent import workflows
+- duplicate-safe source tracking
+- review workflow controls
+- creator/contact workflow controls
+- health and diagnostics endpoints
+- product-specific data-access repositories
 
 Not every module exists yet. The platform is being built incrementally, starting with small working slices.
+
+---
 
 ## Internal Project Boundary Pattern
 
@@ -354,18 +413,20 @@ libs/rpc/adapters
 
 Product-specific logic belongs under the product namespace:
 
-``` txt
+```txt
 libs/{product-name}/...
 ```
 
 Design-system logic belongs in RDC or related design libraries:
 
-``` txt
+```txt
 libs/platform-core-ui
 libs/platform-core-theme
 ```
 
 This helps prevent reusable platform code, product-specific business rules, and design-system concerns from blending together.
+
+---
 
 ## RPC Module Pattern
 
@@ -376,6 +437,7 @@ contracts
 features
 adapters
 ```
+
 ### Contracts
 
 Contracts define provider-neutral TypeScript shapes such as DTOs, request objects, response objects, shared status types, and adapter interfaces.
@@ -390,6 +452,67 @@ Adapters isolate external provider behavior, such as storage providers, CRM tool
 
 This keeps the core platform portable while allowing optional integrations to be added only where useful.
 
+---
+
+## Product Data-Access Pattern
+
+Product-specific persistence belongs under the product boundary, not inside reusable RPC modules.
+
+The current internal pattern separates:
+
+```txt
+apps/{product-api}/prisma
+  app-level Prisma schema and migrations
+
+libs/{product}/infrastructure
+  product infrastructure providers such as Prisma service/module wrappers
+
+libs/{product}/.../data-access
+  product-specific repositories and persistence orchestration
+
+libs/{product}/.../api
+  product-specific API controllers and services
+
+libs/rpc
+  reusable platform contracts, features, and adapters
+```
+
+This allows reusable RPC capabilities to stay portable while product-specific data models remain isolated.
+
+For example:
+
+```txt
+Reusable media ingestion belongs in RPC.
+Collectors Crypt submission records belong in Collectors Crypt data-access.
+Collectors Crypt Prisma migrations belong to the Collectors Crypt API app.
+```
+
+This pattern avoids leaking product-specific persistence rules into the shared platform core.
+
+---
+
+## API Documentation Pattern
+
+Where useful, product APIs may expose living API documentation through OpenAPI / Swagger.
+
+The current internal Collectors Crypt API validates this pattern with:
+
+```txt
+Swagger UI
+OpenAPI JSON
+OpenAPI YAML
+endpoint summaries
+route grouping by feature
+health diagnostics
+admin workflow documentation
+```
+
+This supports faster local development and easier future handoff without exposing private data, credentials, or internal implementation details in the public overview.
+
+Public documentation may describe that OpenAPI documentation exists as a pattern, while the private implementation owns the actual route details, schemas, and runtime configuration.
+
+---
+
 ## Public vs Private Scope
 
 This public repository or README may describe:
@@ -402,6 +525,14 @@ This public repository or README may describe:
 - progress summaries
 - portfolio-safe implementation notes
 - non-sensitive reference module summaries
+- public-safe reference module summaries
+- high-level module boundary patterns
+- provider-agnostic architecture concepts
+- local-first MVP validation patterns
+- public-safe API documentation patterns
+- product-specific boundary patterns
+- app-level migration ownership patterns
+- health and diagnostics patterns
 
 The private repository contains:
 
@@ -417,26 +548,17 @@ The private repository contains:
 - operational scripts
 - personal seed data
 - private application records
-
-In the “This public repository or README may describe” list, add:
-
-```md
-- public-safe reference module summaries
-- high-level module boundary patterns
-- provider-agnostic architecture concepts
-- local-first MVP validation patterns
-```
-
-In the “The private repository contains” list, add:
-
-```md
 - imported or generated media files
 - provider tokens or credentials
 - product-specific business rules
 - private research and review data
 - private creator or submission notes
 - internal adapter implementation details
-```
+- private API route implementations
+- private Prisma schemas and migrations
+- private local database connection details
+
+---
 
 ## Why This Exists
 
@@ -447,6 +569,8 @@ A reusable platform core helps avoid rebuilding the same foundations repeatedly.
 Instead of each product having its own disconnected implementation for forms, data models, APIs, workflows, integrations, document generation, and documentation, RuhlinIT Platform Core creates a shared foundation that can be adapted cleanly.
 
 This supports faster product development while keeping quality, maintainability, and architectural discipline in place.
+
+---
 
 ## Development Status
 
@@ -462,6 +586,8 @@ Documentation standards
 Testing standards
 Native-first architecture
 Local-first MVP patterns
+Product-specific persistence patterns
+API diagnostics and documentation patterns
 ```
 
 Completed internally:
@@ -469,7 +595,7 @@ Completed internally:
 ```txt
 Reusable lead capture contract pattern
 Reusable React feature package pattern
-Native Spring Boot API pattern
+Native API pattern
 PostgreSQL persistence pattern
 Flyway migration pattern
 Frontend and backend testing pattern
@@ -489,6 +615,19 @@ Product-specific Collectors Crypt domain/API feature pattern
 React import panel pattern
 React gallery/list scaffold pattern
 End-to-end local media ingestion smoke test
+Prisma-backed product persistence pattern
+App-level Prisma migration pattern
+Dedicated local PostgreSQL development database pattern
+Product infrastructure library pattern
+Idempotent import/update workflow pattern
+Duplicate-safe source URL import pattern
+Submission review workflow pattern
+Creator contact workflow pattern
+API health diagnostics pattern
+Swagger/OpenAPI living documentation pattern
+Manual import form validation pattern
+Gallery refresh after import/update pattern
+Review status filtering pattern
 ```
 
 Deferred intentionally:
@@ -513,13 +652,24 @@ Submission scoring automation
 Advanced gallery analytics
 Automated public website scraping
 Hosted multi-user research dashboard
+Production hosted database migration
+Production-grade authentication and authorization
+Public-facing creator outreach automation
+Automated third-party source scraping
+Advanced workflow audit history
+Bulk import queue processing
+Advanced OpenAPI schema decoration
+Role-based admin workflow controls
+Production media CDN delivery
 ```
 
 Those areas may be explored later only after the core platform remains stable, tested, and well documented.
 
+---
+
 ## Recent Internal Progress
 
-Recent internal work has expanded RPC beyond lead capture and document generation into media handling and product-specific research workflows.
+Recent internal work has expanded RPC beyond lead capture and document generation into media handling, product-specific research workflows, durable product persistence, and living API documentation.
 
 New validated patterns include:
 
@@ -529,10 +679,21 @@ local media asset ingestion
 provider-neutral storage contracts
 product-specific API orchestration
 product-specific React feature composition
+Prisma-backed PostgreSQL persistence
+app-level Prisma migration ownership
+product infrastructure provider modules
+idempotent import/update behavior
+submission review workflow controls
+creator contact workflow controls
+health diagnostics endpoints
+Swagger/OpenAPI API documentation
 runtime smoke testing across API and web apps
+API restart persistence validation
 ```
 
-This progress reinforces the platform direction: reusable capability is built in RPC, product-specific behavior remains isolated, and external providers are added through optional adapters.
+This progress reinforces the platform direction: reusable capability is built in RPC, product-specific behavior remains isolated, external providers are added through optional adapters, and product data-access remains owned by the product boundary.
+
+---
 
 ## Relationship to Future Products
 
@@ -555,6 +716,19 @@ This allows reuse without contamination.
 Recent internal reference work also validates that product-specific research workflows can consume reusable platform services without forcing those workflows back into the platform core.
 
 For example, a product can use shared media ingestion while keeping its own domain model, review process, UI, data rules, and collaboration strategy isolated.
+
+The latest internal work also validates that product features can own their own durable persistence and API documentation without forcing those concerns into the reusable platform core.
+
+For example:
+
+```txt
+RPC provides reusable media ingestion.
+Collectors Crypt owns its submission records, creator records, review workflow, contact workflow, migrations, and product API documentation.
+```
+
+This pattern can be reused by future products that need their own private data models while still consuming shared platform capabilities.
+
+---
 
 ## Example Future Product Areas
 
@@ -580,22 +754,70 @@ RPC may eventually support internal or public-facing systems across areas such a
 - private review galleries
 - product scouting tools
 - provider-agnostic file and image workflows
+- product-specific review workflows
+- creator/contact management workflows
+- internal scouting and research tools
+- admin health dashboards
+- API documentation portals
+- durable local-first product databases
+- idempotent import/update systems
+- workflow status management
 
 These areas are expected to remain separate products or modules, not one blended application.
+
+---
+
+## Current Validated Product Workflow Pattern
+
+The Collectors Crypt Design Program Watchlist currently validates a useful product workflow pattern:
+
+```txt
+manual data intake
+→ idempotent source-based import
+→ reusable media ingestion
+→ durable product persistence
+→ gallery review
+→ review status transitions
+→ creator/contact workflow tracking
+→ API health diagnostics
+→ living API documentation
+```
+
+This pattern is intentionally product-specific, but the architecture behind it is reusable.
+
+Future products can follow the same structure:
+
+```txt
+product domain
+→ product data-access
+→ product API
+→ reusable RPC services
+→ product UI feature modules
+→ app-level migrations
+→ diagnostics and documentation
+```
+
+The lesson is not that every product should share the same database or business rules. The lesson is that each product can be built with the same disciplined boundaries.
+
+---
 
 ## Guiding Standard
 
 The guiding standard for this project is simple:
 
-```
+```txt
 Build reusable capability once, keep it clean, test it well, document it clearly, and adapt it safely.
 ```
+
+---
 
 ## About RuhlinIT
 
 RuhlinIT is a technology and creative solutions company focused on turning ideas into working systems, digital products, automation workflows, branded experiences, and reusable software foundations.
 
 RuhlinIT Platform Core is part of that long-term internal platform strategy.
+
+---
 
 ## Contact
 
